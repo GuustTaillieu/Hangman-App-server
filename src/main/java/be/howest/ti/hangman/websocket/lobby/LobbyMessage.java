@@ -11,7 +11,6 @@ import java.util.UUID;
 @Builder
 public class LobbyMessage {
 
-    private String content;
     private UUID playerId;
     private LobbyMessageType type;
 }
