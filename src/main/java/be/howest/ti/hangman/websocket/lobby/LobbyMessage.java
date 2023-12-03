@@ -1,16 +1,9 @@
 package be.howest.ti.hangman.websocket.lobby;
 
+import be.howest.ti.hangman.util.enums.LobbyMessageType;
 import lombok.*;
 
-import java.util.UUID;
-
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class LobbyMessage {
+public record LobbyMessage<T>(LobbyMessageType type, T data) {
 
-    private UUID playerId;
-    private LobbyMessageType type;
 }
