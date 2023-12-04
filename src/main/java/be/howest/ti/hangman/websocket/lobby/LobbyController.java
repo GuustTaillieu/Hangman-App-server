@@ -4,7 +4,6 @@ import be.howest.ti.hangman.model.Game;
 import be.howest.ti.hangman.service.GameService;
 import be.howest.ti.hangman.service.PlayerService;
 import be.howest.ti.hangman.util.enums.LobbyMessageType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
@@ -32,7 +31,7 @@ public class LobbyController {
         this.gameService = gameService;
     }
 
-    @MessageMapping("/lobby-join")
+    @MessageMapping("/lobby/join")
     @SendTo("/lobby/activities")
     public LobbyMessage<Set<Game>> joinLobby(@Payload String playerId) {
         log.info("Player with id {} joined the lobby", playerId);
@@ -41,11 +40,10 @@ public class LobbyController {
 
     @MessageMapping("/lobby/create-game")
     @SendTo("/lobby/activities")
-//    Takes JSON with playerId and gameName as payload
     public LobbyMessage<Game> createGame(@Header String playerId, @Header String gameName) {
         log.info("Player with id {} created a game with name {}", playerId, gameName);
-        UUID playerUUID = UUID.fromString(playerId);
-        return new LobbyMessage<>(LobbyMessageType.GAME_CREATED, gameService.createGame(playerUUID, gameName));
+        UUID hostUUID = UUID.fromString(playerId);
+        return new LobbyMessage<>(LobbyMessageType.GAME_CREATED, gameService.createGame(hostUUID, gameName));
     }
 
 }

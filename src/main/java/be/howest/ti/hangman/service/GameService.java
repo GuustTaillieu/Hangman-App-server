@@ -43,10 +43,10 @@ public class GameService {
                 .collect(Collectors.toSet());
     }
 
-    public Game createGame(UUID playerId, String gameName) {
-        Optional<Player> player = playerRepository.getPlayerById(playerId);
+    public Game createGame(UUID hostId, String gameName) {
+        Optional<Player> player = playerRepository.getPlayerById(hostId);
         if (player.isEmpty()) {
-            throw new HangmanException("Player with id " + playerId + " not found");
+            throw new HangmanException("Player with id " + hostId + " not found");
         }
         return gameRepository.createGame(player.get(), gameName);
     }
@@ -67,25 +67,38 @@ public class GameService {
         gameRepository.addPlayerToGame(gameId, player.get());
     }
 
-    public void removeGame(UUID gameId) {
-        gameRepository.removeGame(gameId);
-    }
-
-    public WordToGuess getWordToGuess(Game game) {
-        return gameRepository.getWordToGuess(game);
-    }
-
-    public WordToGuess guessLetter(Game game, char letter) {
-        WordToGuess wordToGuess = getWordToGuess(game);
-        if (wordToGuess.addGuessedLetter(letter)) {
-            String newState = wordToGuess.getWord().chars()
-                    .mapToObj(c -> wordToGuess.getGuessedLetters().contains((char) c) ? (char) c : '_')
-                    .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-                    .toString();
-            return gameRepository.updateWordToGuessState(game, newState);
-        } else {
-            throw new HangmanException("Letter " + letter + " already guessed");
+    public void removePlayerFromGame(Game game, Player player) {
+        game.removePlayer(player);
+        player.setGame(null);
+        if (game.getPlayers().isEmpty() || game.getHost().equals(player)) {
+            removeGame(game);
         }
     }
 
+    public void removeGame(Game game) {
+        gameRepository.removeGame(game);
+    }
+
+    public void guessLetter(Game game, Player player, char letter) {
+        WordToGuess wordToGuess = gameRepository.getWordToGuess(game);
+        wordToGuess.guessLetter(player, letter);
+        if (allPlayersDoneWithWord(wordToGuess)) {
+            game.incrementCurrentWordToGuessIndex();
+        }
+    }
+
+    private boolean allPlayersDoneWithWord(WordToGuess wordToGuess) {
+        return wordToGuess.getBelongingGame().getPlayers().stream().allMatch(wordToGuess::isDoneWithWord);
+    }
+
+    public void addWordToGame(Game game, UUID playerUUID, String word) {
+        Optional<Player> player = playerRepository.getPlayerById(playerUUID);
+        if (player.isEmpty()) {
+            throw new HangmanException("Player with id " + playerUUID + " not found");
+        }
+        game.addWordToGuess(player.get(), word);
+        if (game.getWords().size() == game.getPlayers().size()) {
+            game.setStatus(GameStatus.STARTED);
+        }
+    }
 }

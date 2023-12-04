@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,19 +14,28 @@ import java.util.Set;
 public class WordToGuess {
 
     private final String word;
-    private String state;
     private final Player owner;
+    private final Map<Player, Set<Character>> guesses;
     @JsonIgnore
     private final Game belongingGame;
-    @Setter
-    private boolean guessed = false;
-    private Set<Character> guessedLetters;
 
     public WordToGuess(String word, Player owner, Game belongingGame) {
-        this.word = word;
-        this.state = "_".repeat(word.length());
+        this.word = word.toLowerCase();
         this.owner = owner;
         this.belongingGame = belongingGame;
+        this.guesses = Map.of(owner, word.chars().mapToObj(c -> (char) c).collect(HashSet::new, HashSet::add, HashSet::addAll));
+    }
+
+    public int getWrongGuesses(Player player) {
+        return guesses.get(player).stream().filter(c -> !word.contains(c.toString())).toArray().length;
+    }
+
+    public boolean isDoneWithWord(Player player) {
+        return getWrongGuesses(player) > 10 || guessedWord(player);
+    }
+
+    private boolean guessedWord(Player player) {
+        return word.chars().mapToObj(c -> (char) c).allMatch(guesses.get(player)::contains);
     }
 
     @Override
@@ -39,14 +50,10 @@ public class WordToGuess {
         return Objects.hash(word, owner, belongingGame);
     }
 
-    public void setState(String newState) {
-        this.state = newState;
-    }
-    public boolean addGuessedLetter(char guessedLetter) {
-        if (guessedLetters.contains(guessedLetter)) {
-            return false;
+    public void guessLetter(Player player, char letter) {
+        if (isDoneWithWord(player)) {
+            throw new HangmanException("Player " + player.getName() + " is already done with this word");
         }
-        this.guessedLetters.add(guessedLetter);
-        return true;
+        guesses.get(player).add(letter);
     }
 }

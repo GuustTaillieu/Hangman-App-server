@@ -4,11 +4,13 @@ import be.howest.ti.hangman.model.Game;
 import be.howest.ti.hangman.model.Player;
 import be.howest.ti.hangman.model.WordToGuess;
 import be.howest.ti.hangman.util.exceptions.HangmanException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
 @Repository("inMemoryGameRepository")
+@Slf4j
 public class InMemoryGameRepository implements GameRepository{
 
     private final Set<Game> games = new HashSet<>();
@@ -19,9 +21,9 @@ public class InMemoryGameRepository implements GameRepository{
     }
 
     @Override
-    public Game createGame(Player player, String gameName) {
-        Game game = new Game(player, gameName);
-        player.setGame(game);
+    public Game createGame(Player host, String gameName) {
+        Game game = new Game(host, gameName);
+        host.setGame(game);
         games.add(game);
         return game;
     }
@@ -48,18 +50,7 @@ public class InMemoryGameRepository implements GameRepository{
     }
 
     @Override
-    public WordToGuess updateWordToGuessState(Game game, String newWordToGuessState) {
-        game.getWordToGuess().setState(newWordToGuessState);
-        return game.getWordToGuess();
-    }
-
-    @Override
-    public void removeGame(UUID gameId) {
-        Optional<Game> game = getGameById(gameId);
-        if (game.isPresent()) {
-            games.remove(game.get());
-        } else {
-            throw new HangmanException("Game with id " + gameId + " not found");
-        }
+    public void removeGame(Game game) {
+        games.remove(game);
     }
 }

@@ -15,6 +15,5 @@ public interface GameRepository {
     Optional<Game> getGameById(UUID id);
     void addPlayerToGame(UUID gameId, Player player);
     WordToGuess getWordToGuess(Game game);
-    WordToGuess updateWordToGuessState(Game game, String newWordToGuessState);
-    void removeGame(UUID gameId);
+    void removeGame(Game game);
 }

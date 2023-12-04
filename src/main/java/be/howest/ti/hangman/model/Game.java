@@ -12,12 +12,15 @@ public class Game {
 
     private final UUID id = UUID.randomUUID();
     private final String name;
+    private final Player host;
     private GameStatus status;
     private final Set<Player> players;
     private final List<WordToGuess> words;
+    private int currentWordToGuessIndex = 0;
 
-    public Game(String name, Set<Player> players, List<WordToGuess> words) {
+    public Game(String name, Player host, Set<Player> players, List<WordToGuess> words) {
         this.name = name;
+        this.host = host;
         if (players.isEmpty()) {
             throw new IllegalArgumentException("A game needs at least one player");
         }
@@ -25,12 +28,12 @@ public class Game {
         this.words = words;
         this.status = GameStatus.WAITING_FOR_PLAYERS;
     }
-    public Game(Set<Player> players, String name) {
-        this(name, players, new ArrayList<>());
+    public Game(Set<Player> players, Player host, String name) {
+        this(name, host, players, new ArrayList<>());
     }
 
-    public Game(Player player, String name) {
-        this(Set.of(player), name);
+    public Game(Player host, String name) {
+        this(new HashSet<>(Collections.singletonList(host)), host, name);
     }
 
     public void addPlayer(Player player) {
@@ -39,24 +42,13 @@ public class Game {
         } else {
             throw new HangmanException("Game is already started");
         }
-        players.add(player);
-        setGameStatus(GameStatus.WAITING_FOR_WORDS);
+    }
+    public void removePlayer(Player player) {
+        players.remove(player);
     }
 
-    private void setGameStatus(GameStatus gameStatus) {
+    public void setStatus(GameStatus gameStatus) {
         this.status = gameStatus;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Game game)) return false;
-        return Objects.equals(id, game.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 
     @JsonIgnore
@@ -73,14 +65,33 @@ public class Game {
         if (words.isEmpty()) {
             throw new HangmanException("No words to guess");
         }
-        return words.stream()
-                .filter(word -> !word.isGuessed())
-                .findFirst()
-                .orElseThrow(() -> new HangmanException("No words to guess"));
+        return words.get(currentWordToGuessIndex);
     }
 
-    public void removePlayer(Player player) {
-        players.remove(player);
-        setGameStatus(GameStatus.WAITING_FOR_PLAYERS);
+    public void incrementCurrentWordToGuessIndex() {
+        if (currentWordToGuessIndex + 1 > words.size()) {
+            throw new HangmanException("No more words to guess");
+        }
+        currentWordToGuessIndex++;
+    }
+
+    public void addWordToGuess(Player player, String word) {
+        if (GameStatus.WAITING_FOR_WORDS.equals(status)) {
+            words.add(new WordToGuess(word, player, this));
+        } else {
+            throw new HangmanException("Game is already started or waiting for players");
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Game game)) return false;
+        return Objects.equals(id, game.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
