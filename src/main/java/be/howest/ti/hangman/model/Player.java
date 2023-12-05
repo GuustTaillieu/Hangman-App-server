@@ -1,17 +1,24 @@
 package be.howest.ti.hangman.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Getter
-@ToString
 public class Player {
     private final UUID id;
+    @JsonIgnore
     private final String sessionId;
     private final String name;
+    @Setter
+    @JsonIgnore
+    private Game game;
+    @Setter
     private int score;
 
     public Player(String sessionId, UUID playerId, String name) {
@@ -19,5 +26,25 @@ public class Player {
         this.id = playerId;
         this.name = name;
         this.score = 0;
+    }
+
+    public int getWrongGuesses() {
+        WordToGuess wordToGuess = game.getCurrentWord();
+        if (wordToGuess == null) {
+            return 0;
+        }
+        return wordToGuess.getWrongGuesses(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Player player)) return false;
+        return Objects.equals(id, player.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
