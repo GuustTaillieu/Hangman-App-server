@@ -96,9 +96,26 @@ public class GameService {
         if (player.isEmpty()) {
             throw new HangmanException("Player with id " + playerUUID + " not found");
         }
+        if (game.getWords().stream().anyMatch(w -> w.getOwner().getId().equals(playerUUID))) {
+            throw new HangmanException("Player already sent a word");
+        }
         game.addWordToGuess(player.get(), word);
-        if (game.getWords().size() == game.getPlayers().size()) {
+        if (everyPlayerHasSentAWord(game)) {
             game.setStatus(GameStatus.STARTED);
         }
+    }
+
+    private boolean everyPlayerHasSentAWord(Game game) {
+        return game.getWords().stream().map(WordToGuess::getOwner).collect(Collectors.toSet()).equals(game.getPlayers());
+    }
+
+    public void nextWord(Game game) {
+        game.incrementCurrentWordToGuessIndex();
+    }
+
+    public void resetGame(Game game) {
+        game.setStatus(GameStatus.WAITING_FOR_PLAYERS);
+        game.getWords().clear();
+        game.setCurrentWordToGuessIndex(0);
     }
 }

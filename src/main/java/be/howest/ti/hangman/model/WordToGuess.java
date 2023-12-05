@@ -2,20 +2,21 @@ package be.howest.ti.hangman.model;
 
 import be.howest.ti.hangman.util.exceptions.HangmanException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 public class WordToGuess {
 
+    private static final int MAX_WRONG_GUESSES = 9;
+
     private final String word;
     private final Player owner;
-    private final Map<Player, Set<Character>> guesses;
+    private final Map<UUID, List<Character>> guesses;
     @JsonIgnore
     private final Game belongingGame;
 
@@ -23,19 +24,40 @@ public class WordToGuess {
         this.word = word.toLowerCase();
         this.owner = owner;
         this.belongingGame = belongingGame;
-        this.guesses = Map.of(owner, word.chars().mapToObj(c -> (char) c).collect(HashSet::new, HashSet::add, HashSet::addAll));
+        this.guesses = new HashMap<>();
+        guesses.put(owner.getId(), word.chars().mapToObj(c -> (char) c).toList());
     }
 
+    @JsonIgnore
     public int getWrongGuesses(Player player) {
-        return guesses.get(player).stream().filter(c -> !word.contains(c.toString())).toArray().length;
+        if (!guesses.containsKey(player.getId())) {
+            guesses.put(player.getId(), new ArrayList<>());
+        }
+        return guesses.get(player.getId()).stream().filter(c -> !word.contains(c.toString())).toArray().length;
     }
 
     public boolean isDoneWithWord(Player player) {
-        return getWrongGuesses(player) > 10 || guessedWord(player);
+        return getWrongGuesses(player) >= MAX_WRONG_GUESSES || guessedWord(player);
     }
 
     private boolean guessedWord(Player player) {
-        return word.chars().mapToObj(c -> (char) c).allMatch(guesses.get(player)::contains);
+        return word.chars().mapToObj(c -> (char) c).allMatch(guesses.get(player.getId())::contains);
+    }
+
+    public void guessLetter(Player player, char letter) {
+        if (isDoneWithWord(player)) {
+            throw new HangmanException("Player " + player.getName() + " is already done with this word");
+        }
+        if (!guesses.containsKey(player.getId())) {
+            guesses.put(player.getId(), new ArrayList<>());
+        }
+        guesses.get(player.getId()).add(letter);
+        if (player.getWrongGuesses() >= MAX_WRONG_GUESSES) {
+            player.setScore(player.getScore() - 1);
+        }
+        if (guessedWord(player)) {
+            player.setScore(player.getScore() + 1);
+        }
     }
 
     @Override
@@ -48,12 +70,5 @@ public class WordToGuess {
     @Override
     public int hashCode() {
         return Objects.hash(word, owner, belongingGame);
-    }
-
-    public void guessLetter(Player player, char letter) {
-        if (isDoneWithWord(player)) {
-            throw new HangmanException("Player " + player.getName() + " is already done with this word");
-        }
-        guesses.get(player).add(letter);
     }
 }

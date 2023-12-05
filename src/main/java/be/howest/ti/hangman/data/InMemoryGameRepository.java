@@ -46,7 +46,7 @@ public class InMemoryGameRepository implements GameRepository{
 
     @Override
     public WordToGuess getWordToGuess(Game game) {
-        return game.getWordToGuess();
+        return game.getCurrentWordToGuess();
     }
 
     @Override

@@ -28,6 +28,14 @@ public class Player {
         this.score = 0;
     }
 
+    public int getWrongGuesses() {
+        WordToGuess wordToGuess = game.getCurrentWord();
+        if (wordToGuess == null) {
+            return 0;
+        }
+        return wordToGuess.getWrongGuesses(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

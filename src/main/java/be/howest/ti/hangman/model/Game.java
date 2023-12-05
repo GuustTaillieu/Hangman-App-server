@@ -16,7 +16,9 @@ public class Game {
     private GameStatus status;
     private final Set<Player> players;
     private final List<WordToGuess> words;
+    @JsonIgnore
     private int currentWordToGuessIndex = 0;
+    private String currentWord;
 
     public Game(String name, Player host, Set<Player> players, List<WordToGuess> words) {
         this.name = name;
@@ -52,7 +54,7 @@ public class Game {
     }
 
     @JsonIgnore
-    public WordToGuess getWordToGuess() {
+    public WordToGuess getCurrentWordToGuess() {
         if (GameStatus.WAITING_FOR_WORDS.equals(status)) {
             throw new HangmanException("Game is waiting for words");
         }
@@ -68,11 +70,21 @@ public class Game {
         return words.get(currentWordToGuessIndex);
     }
 
-    public void incrementCurrentWordToGuessIndex() {
-        if (currentWordToGuessIndex + 1 > words.size()) {
-            throw new HangmanException("No more words to guess");
+    public WordToGuess getCurrentWord() {
+        try {
+            return getCurrentWordToGuess();
+        } catch (HangmanException e) {
+            return null;
         }
-        currentWordToGuessIndex++;
+    }
+
+    public void incrementCurrentWordToGuessIndex() {
+        if (currentWordToGuessIndex + 1 >= words.size()) {
+            words.clear();
+            status = GameStatus.FINISHED;
+        } else {
+            currentWordToGuessIndex++;
+        }
     }
 
     public void addWordToGuess(Player player, String word) {
@@ -93,5 +105,9 @@ public class Game {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public void setCurrentWordToGuessIndex(int nr) {
+        this.currentWordToGuessIndex = nr;
     }
 }
