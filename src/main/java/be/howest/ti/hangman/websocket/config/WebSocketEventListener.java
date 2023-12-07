@@ -4,23 +4,19 @@ import be.howest.ti.hangman.model.Game;
 import be.howest.ti.hangman.model.Player;
 import be.howest.ti.hangman.service.GameService;
 import be.howest.ti.hangman.service.PlayerService;
-import be.howest.ti.hangman.util.enums.GameMessageType;
 import be.howest.ti.hangman.util.enums.GameStatus;
-import be.howest.ti.hangman.websocket.game.GameMessage;
-import be.howest.ti.hangman.websocket.lobby.LobbyMessage;
+import be.howest.ti.hangman.websocket.message.LobbyMessage;
 import be.howest.ti.hangman.util.enums.LobbyMessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -74,7 +70,7 @@ public class WebSocketEventListener {
                 log.info("Game with id {} removed", game.getId());
                 messagingTemplate.convertAndSend("/lobby/activities", new LobbyMessage<>(LobbyMessageType.GAME_REMOVED, gameService.getLobbyGames()));
             }
-            messagingTemplate.convertAndSend("/topic/game." + game.getId(), new GameMessage<>(GameMessageType.GAME_UPDATED, game));
+            messagingTemplate.convertAndSend("/topic/game." + game.getId(), game);
         } else {
             gameService.removeGame(game);
             log.info("Game with id {} removed", game.getId());

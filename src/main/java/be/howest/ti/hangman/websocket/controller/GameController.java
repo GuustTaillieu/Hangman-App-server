@@ -1,14 +1,13 @@
-package be.howest.ti.hangman.websocket.game;
+package be.howest.ti.hangman.websocket.controller;
 
 import be.howest.ti.hangman.model.Game;
 import be.howest.ti.hangman.model.Player;
 import be.howest.ti.hangman.service.GameService;
 import be.howest.ti.hangman.service.PlayerService;
-import be.howest.ti.hangman.util.enums.GameMessageType;
 import be.howest.ti.hangman.util.enums.GameStatus;
 import be.howest.ti.hangman.util.enums.LobbyMessageType;
 import be.howest.ti.hangman.util.exceptions.HangmanException;
-import be.howest.ti.hangman.websocket.lobby.LobbyMessage;
+import be.howest.ti.hangman.websocket.message.LobbyMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
@@ -40,7 +39,7 @@ public class GameController {
         gameService.addPlayerToGame(gameUUID, playerUUID);
         Game game = gameService.getGameById(gameUUID);
         messagingTemplate.convertAndSend("/lobby/activities", new LobbyMessage<>(LobbyMessageType.GAME_JOINED, game));
-        messagingTemplate.convertAndSend("/game/" + gameId, new GameMessage<>(GameMessageType.GAME_UPDATED, game));
+        messagingTemplate.convertAndSend("/topic/game." + gameId, game);
     }
 
     @MessageMapping("/game/start")
@@ -53,7 +52,7 @@ public class GameController {
             throw new HangmanException("Not enough players to start the game");
         }
         game.setStatus(GameStatus.WAITING_FOR_WORDS);
-        messagingTemplate.convertAndSend("/topic/game." + gameId, new GameMessage<>(GameMessageType.GAME_UPDATED, game));
+        messagingTemplate.convertAndSend("/topic/game." + gameId, game);
         log.info("Starting game {} by player {}", gameId, playerId);
     }
 
@@ -62,7 +61,7 @@ public class GameController {
         Game game = gameService.getGameById(UUID.fromString(gameId));
         UUID playerUUID = UUID.fromString(playerId);
         gameService.addWordToGame(game, playerUUID, word);
-        messagingTemplate.convertAndSend("/topic/game." + gameId, new GameMessage<>(GameMessageType.GAME_UPDATED, game));
+        messagingTemplate.convertAndSend("/topic/game." + gameId, game);
         log.info("Setting word {} for game {} by player {}", word, gameId, playerId);
     }
 
@@ -72,7 +71,7 @@ public class GameController {
         UUID playerUUID = UUID.fromString(playerId);
         Player player = playerService.getPlayerById(playerUUID);
         gameService.guessLetter(game, player, letter.toLowerCase().charAt(0));
-        messagingTemplate.convertAndSend("/topic/game." + gameId, new GameMessage<>(GameMessageType.GAME_UPDATED, game));
+        messagingTemplate.convertAndSend("/topic/game." + gameId, game);
         log.info("Guessing letter {} for game {} by player {}", letter, gameId, playerId);
     }
 
@@ -80,7 +79,7 @@ public class GameController {
     public void resetGame(@Header String gameId) {
         Game game = gameService.getGameById(UUID.fromString(gameId));
         gameService.resetGame(game);
-        messagingTemplate.convertAndSend("/topic/game." + gameId, new GameMessage<>(GameMessageType.GAME_UPDATED, game));
+        messagingTemplate.convertAndSend("/topic/game." + gameId, game);
         log.info("Resetting game {}", gameId);
     }
 }
