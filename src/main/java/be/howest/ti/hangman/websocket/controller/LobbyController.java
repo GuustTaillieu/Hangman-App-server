@@ -1,9 +1,10 @@
-package be.howest.ti.hangman.websocket.lobby;
+package be.howest.ti.hangman.websocket.controller;
 
 import be.howest.ti.hangman.model.Game;
 import be.howest.ti.hangman.service.GameService;
 import be.howest.ti.hangman.service.PlayerService;
 import be.howest.ti.hangman.util.enums.LobbyMessageType;
+import be.howest.ti.hangman.websocket.message.LobbyMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
