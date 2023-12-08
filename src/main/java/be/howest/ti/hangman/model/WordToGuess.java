@@ -2,17 +2,14 @@ package be.howest.ti.hangman.model;
 
 import be.howest.ti.hangman.util.exceptions.HangmanException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 
 @Getter
 public class WordToGuess {
 
-    private static final int MAX_WRONG_GUESSES = 9;
+    private static final int MAX_WRONG_GUESSES = 10;
 
     private final String word;
     private final Player owner;
