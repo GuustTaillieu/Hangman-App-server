@@ -13,7 +13,8 @@ If the server would be deployed on the web, the app would be able to be used as 
 2. After installing Java, we will need to `download the server`. This can be done by clicking on the green button that says "Code" and then clicking on "Download ZIP".
 
 3. After downloading the server, we will need to `unzip the file`.
-4. After unzipping the file, we will need to open the terminal and navigate to the folder where the server is located. This can be done by typing the following command in the terminal:
+
+4. After unzipping the file, we will need to `open the terminal and navigate to the folder where the server is located`. This can be done by typing the following command in the terminal:
 
 ```bash
 cd path/to/the/server
