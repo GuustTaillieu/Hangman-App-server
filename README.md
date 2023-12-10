@@ -2,15 +2,15 @@
 
 ## Description
 
-This is a server for the Hangman App. It is built with Spring Boot and uses memory as a database since the app is not meant to be used by many users at the same time. And the app is also designed to remove all unused data after the user disconnects from the server.
-I have tried to deploy the server on Heroku and Render but I have not been able to make it work. This means that the app can only be used locally. So thus not as an application and not on the web.
-If the server would be deployed on the web, the app would be able to be used as a downloadable application and also on the web. Unfortunately, this is not the case.
+This is a server for the Hangman app. Built with Spring Boot, the application utilizes memory as its database, given its design for use by a limited number of users simultaneously. And the app is also designed to remove all unused data after the user disconnects from the server.
+I have tried to deploy the server on Heroku and Render, but I have not been able to make it work. This means that the app can only be used locally. So thus, not as an application and not on the web.
+If the server were deployed on the web, the app would be able to be used as a downloadable application and also on the web. Unfortunately, this is not the case.
 
 ## How to run the server
 
 1. So before running the client, we will need to run the server locally. To do this, we will need to have `Java installed on our computer`. If you do not have Java installed, you can download it from [here](https://www.java.com/en/download/).
 
-2. After installing Java, we will need to `download the server`. This can be done by clicking on the green button that says "Code" and then clicking on "Download ZIP".
+2. After installing Java, we will need to `download the server`. This can be done by clicking on the green button that says "Code" and then clicking on "Download ZIP."
 
 3. After downloading the server, we will need to `unzip the file`.
 
@@ -18,6 +18,7 @@ If the server would be deployed on the web, the app would be able to be used as 
 
 ```bash
 cd path/to/the/server
+
 
 (Example: cd C:\Users\{user}\Downloads\hangman-app-server)
 ```
