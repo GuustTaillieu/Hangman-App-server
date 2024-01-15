@@ -4,6 +4,7 @@ import be.howest.ti.hangman.util.enums.GameStatus;
 import be.howest.ti.hangman.util.exceptions.HangmanException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -13,9 +14,11 @@ public class Game {
     private final UUID id = UUID.randomUUID();
     private final String name;
     private final Player host;
+    @Setter
     private GameStatus status;
     private final Set<Player> players;
     private final List<WordToGuess> words;
+    @Setter
     @JsonIgnore
     private int currentWordToGuessIndex = 0;
     private String currentWord;
@@ -47,10 +50,6 @@ public class Game {
     }
     public void removePlayer(Player player) {
         players.remove(player);
-    }
-
-    public void setStatus(GameStatus gameStatus) {
-        this.status = gameStatus;
     }
 
     @JsonIgnore
@@ -107,7 +106,4 @@ public class Game {
         return Objects.hash(id);
     }
 
-    public void setCurrentWordToGuessIndex(int nr) {
-        this.currentWordToGuessIndex = nr;
-    }
 }
